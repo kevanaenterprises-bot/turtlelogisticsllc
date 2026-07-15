@@ -47,11 +47,56 @@
     .nav-logo img { width: 44px; height: 44px; object-fit: contain; }
     .nav-logo span { font-size: 1.15rem; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
     .nav-logo span em { color: var(--accent); font-style: normal; }
-    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links { display: flex; gap: 32px; list-style: none; align-items: center; }
     .nav-links a { color: var(--muted); text-decoration: none; font-size: 0.9rem; font-weight: 500; transition: color 0.2s; }
     .nav-links a:hover { color: var(--text); }
     .nav-cta { background: var(--accent); color: #000 !important; padding: 9px 20px; border-radius: 8px; font-weight: 600 !important; transition: background 0.2s !important; }
     .nav-cta:hover { background: var(--accent2) !important; color: #000 !important; }
+
+    /* Dropdown menu */
+    .nav-dropdown { position: relative; }
+    .nav-dropdown-toggle {
+      color: var(--muted); font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; background: none; border: none; display: flex; align-items: center; gap: 6px;
+      padding: 0; transition: color 0.2s;
+    }
+    .nav-dropdown-toggle:hover { color: var(--text); }
+    .nav-dropdown-toggle svg { width: 12px; height: 12px; transition: transform 0.2s; }
+    .nav-dropdown.open .nav-dropdown-toggle svg { transform: rotate(180deg); }
+    .nav-dropdown-menu {
+      display: none; position: absolute; top: calc(100% + 8px); left: 0;
+      background: #161b22; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 8px; min-width: 240px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4); z-index: 1000;
+    }
+    .nav-dropdown.open .nav-dropdown-menu { display: block; }
+    .nav-dropdown-menu a {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 8px; color: var(--muted);
+      text-decoration: none; font-size: 0.85rem; font-weight: 400;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-dropdown-menu a:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+    .nav-dropdown-menu a .dd-icon { font-size: 1.1rem; width: 24px; text-align: center; }
+    .nav-dropdown-menu a .dd-label { flex: 1; }
+    .nav-dropdown-menu a .dd-desc { font-size: 0.75rem; color: var(--muted); opacity: 0.6; }
+    .nav-dd-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 4px 8px; }
+
+    /* Hamburger for mobile */
+    .nav-hamburger {
+      display: none; background: none; border: none; cursor: pointer;
+      width: 36px; height: 36px; position: relative; z-index: 1001;
+    }
+    .nav-hamburger span {
+      display: block; width: 22px; height: 2px; background: var(--text);
+      position: absolute; left: 7px; transition: 0.3s;
+    }
+    .nav-hamburger span:nth-child(1) { top: 10px; }
+    .nav-hamburger span:nth-child(2) { top: 17px; }
+    .nav-hamburger span:nth-child(3) { top: 24px; }
+    .nav-hamburger.open span:nth-child(1) { top: 17px; transform: rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { top: 17px; transform: rotate(-45deg); }
 
     /* HERO */
     .hero {
@@ -208,7 +253,18 @@
       .about-visual { order: 2; }
       .about-text { order: 1; }
       .form-row { grid-template-columns: 1fr; }
-      .nav-links { display: none; }
+      .nav-links {
+        display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        background: #0d1117; flex-direction: column; justify-content: center;
+        align-items: center; gap: 24px; z-index: 999;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1.2rem; }
+      .nav-dropdown-menu {
+        position: static; box-shadow: none; border: none;
+        background: rgba(255,255,255,0.03); margin-top: 8px; min-width: auto;
+      }
+      .nav-hamburger { display: block; }
       .contact-card { padding: 32px 24px; }
       .credit-tiers { grid-template-columns: 1fr 1fr; }
       .shellmate-pricing { grid-template-columns: 1fr 1fr; }
@@ -223,11 +279,47 @@
       <img src="turtle-logo.png" alt="Turtle Logistics Logo"/>
       <span>Turtle <em>Logistics</em></span>
     </a>
+    <button class="nav-hamburger" onclick="this.classList.toggle('open'); document.querySelector('.nav-links').classList.toggle('open');" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
     <ul class="nav-links">
+      <li class="nav-dropdown" onclick="this.classList.toggle('open')">
+        <button class="nav-dropdown-toggle">
+          Quick Links
+          <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l3 3 3-3"/></svg>
+        </button>
+        <div class="nav-dropdown-menu">
+          <a href="https://haulflow.turtlelogisticsllc.com" target="_blank">
+            <span class="dd-icon">🚛</span>
+            <span class="dd-label">HaulFlow Log In</span>
+          </a>
+          <a href="https://haulflow.turtlelogisticsllc.com/driver" target="_blank">
+            <span class="dd-icon">🪪</span>
+            <span class="dd-label">Driver Portal</span>
+          </a>
+          <a href="https://haulflow.turtlelogisticsllc.com/admin" target="_blank">
+            <span class="dd-icon">⚙️</span>
+            <span class="dd-label">Admin Console</span>
+          </a>
+          <div class="nav-dd-divider"></div>
+          <a href="https://haulflow.turtlelogisticsllc.com/blog" target="_blank">
+            <span class="dd-icon">📰</span>
+            <span class="dd-label">Blog</span>
+          </a>
+          <div class="nav-dd-divider"></div>
+          <a href="https://turtlelogisticsllc.com/privacy.html" target="_blank">
+            <span class="dd-icon">🔒</span>
+            <span class="dd-label">Privacy Policy</span>
+          </a>
+          <a href="https://turtlelogisticsllc.com/terms.html" target="_blank">
+            <span class="dd-icon">📜</span>
+            <span class="dd-label">Terms of Service</span>
+          </a>
+        </div>
+      </li>
       <li><a href="#products">Products</a></li>
       <li><a href="#services">Services</a></li>
       <li><a href="#about">About</a></li>
-      <li><a href="https://haulflow.turtlelogisticsllc.com/blog" target="_blank">Blog</a></li>
       <li><a href="#contact" class="nav-cta">Get Started</a></li>
     </ul>
   </nav>
