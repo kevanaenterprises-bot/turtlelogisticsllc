@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="GamingFlow - a working sandbox of the deposit and auto-credit system for gaming operators. No real money, no real platforms.">
+<meta name="robots" content="noindex">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>GamingFlow Sandbox</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap">
+</head>
+<body>
+<style>
+  :root{
+    --bg:#f2f5f5;
+    --surface:#ffffff;
+    --sunk:#eef2f2;
+    --ink:#111917;
+    --muted:#5f716d;
+    --line:#dbe3e2;
+    --line-soft:#e9efee;
+    --brand:#0d7a76;
+    --brand-soft:#e0f0ef;
+    --ok:#17803d;
+    --ok-soft:#e3f2e8;
+    --pend:#a16207;
+    --pend-soft:#fbf1de;
+    --stop:#b42318;
+    --stop-soft:#fce9e7;
+    --shadow:0 1px 2px rgba(17,25,23,.05),0 6px 18px rgba(17,25,23,.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0b100f; --surface:#141b1a; --sunk:#101615; --ink:#e6eceb; --muted:#8fa29d;
+      --line:#242e2c; --line-soft:#1b2322; --brand:#4fbdb6; --brand-soft:#0e2926;
+      --ok:#5cc084; --ok-soft:#122718; --pend:#d6a84e; --pend-soft:#2a2114;
+      --stop:#e08a7e; --stop-soft:#2e1a18;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0b100f; --surface:#141b1a; --sunk:#101615; --ink:#e6eceb; --muted:#8fa29d;
+    --line:#242e2c; --line-soft:#1b2322; --brand:#4fbdb6; --brand-soft:#0e2926;
+    --ok:#5cc084; --ok-soft:#122718; --pend:#d6a84e; --pend-soft:#2a2114;
+    --stop:#e08a7e; --stop-soft:#2e1a18;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3);
+  }
+
+  *{box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  h1,h2,h3{margin:0;font-weight:700;letter-spacing:-.015em;text-wrap:balance}
+  p{margin:0}
+  button{font-family:inherit;font-size:inherit;cursor:pointer}
+  input,select{font-family:inherit;font-size:inherit}
+
+  .mono{font-family:"DM Mono",ui-monospace,monospace}
+  .lbl{font-family:"DM Mono",ui-monospace,monospace;font-size:.66rem;letter-spacing:.11em;text-transform:uppercase;color:var(--muted)}
+
+  /* demo chrome */
+  .demobar{
+    background:var(--ink);color:var(--bg);padding:9px 16px;display:flex;flex-wrap:wrap;
+    align-items:center;gap:10px 16px;justify-content:center;text-align:center;
+  }
+  .demobar .dot{width:7px;height:7px;border-radius:50%;background:var(--pend);flex:none}
+  .demobar span{font-size:.82rem}
+  .demobar strong{font-weight:700}
+
+  .wrap{max-width:1000px;margin:0 auto;padding-inline:16px;padding-block:22px 72px}
+
+  .topline{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin-bottom:20px}
+  .brandmark{display:flex;align-items:center;gap:10px}
+  .brandmark .mk{width:30px;height:30px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.9rem;flex:none}
+  .brandmark h1{font-size:1.12rem}
+  .brandmark .sub{font-size:.76rem;color:var(--muted)}
+
+  .switch{display:flex;background:var(--sunk);border:1px solid var(--line);border-radius:9px;padding:3px;gap:3px}
+  .switch button{border:0;background:none;color:var(--muted);padding:7px 15px;border-radius:6px;font-weight:600;font-size:.85rem}
+  .switch button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:var(--shadow)}
+  .ghost{border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:7px 13px;border-radius:7px;font-size:.82rem;font-weight:600}
+  .ghost:hover{color:var(--ink)}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+  .pad{padding:20px}
+  .grid2{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;align-items:start}
+  @media (max-width:780px){.grid2{grid-template-columns:1fr}}
+
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .field label{font-size:.83rem;font-weight:600}
+  .field input,.field select{
+    width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:8px;
+    background:var(--sunk);color:var(--ink);outline:none;
+  }
+  .field input:focus,.field select:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row .field{flex:1;min-width:130px}
+
+  .chips{display:flex;gap:7px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:var(--sunk);color:var(--ink);padding:8px 13px;border-radius:7px;font-weight:600;font-size:.85rem}
+  .chip[aria-pressed="true"]{border-color:var(--brand);background:var(--brand-soft);color:var(--brand)}
+
+  .go{
+    width:100%;border:0;background:var(--brand);color:#fff;padding:13px;border-radius:9px;
+    font-weight:700;font-size:.95rem;
+  }
+  .go:disabled{opacity:.45;cursor:not-allowed}
+  .go.wide{width:auto;padding:11px 20px}
+  .danger{background:var(--stop)}
+  .neutral{background:var(--muted)}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:99px;font-size:.7rem;font-weight:700;font-family:"DM Mono",monospace;letter-spacing:.04em;text-transform:uppercase}
+  .p-pend{background:var(--pend-soft);color:var(--pend)}
+  .p-paid{background:var(--brand-soft);color:var(--brand)}
+  .p-cred{background:var(--ok-soft);color:var(--ok)}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  .tw{overflow-x:auto}
+  th{text-align:left;font-family:"DM Mono",monospace;font-size:.64rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:0 12px 9px 0;border-bottom:1px solid var(--line)}
+  td{padding:11px 12px 11px 0;border-bottom:1px solid var(--line-soft);font-size:.88rem;white-space:nowrap}
+  tr:last-child td{border-bottom:0}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+  .tile{background:var(--sunk);border:1px solid var(--line-soft);border-radius:9px;padding:13px 14px;display:flex;flex-direction:column;gap:3px}
+  .tile .nm{font-size:.8rem;font-weight:600}
+  .tile .bal{font-family:"DM Mono",monospace;font-size:1.15rem;font-weight:500}
+  .tile .cap{font-size:.7rem;color:var(--muted)}
+
+  .paused{background:var(--pend-soft);border:1px solid var(--pend);border-radius:10px;padding:20px;display:flex;flex-direction:column;gap:7px}
+  .paused h3{color:var(--pend);font-size:1rem}
+
+  /* simulated checkout */
+  .veil{position:fixed;inset:0;background:rgba(10,16,15,.62);display:grid;place-items:center;padding:18px;z-index:40}
+  .modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;max-width:400px;width:100%;padding:24px;display:flex;flex-direction:column;gap:15px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+  .modal .fake{background:var(--pend-soft);color:var(--pend);border:1px dashed var(--pend);border-radius:7px;padding:9px 11px;font-size:.78rem;font-weight:600;text-align:center}
+  .modal .amt{font-family:"DM Mono",monospace;font-size:2rem;font-weight:500;text-align:center}
+  .modal .to{text-align:center;color:var(--muted);font-size:.85rem}
+  .modal .acts{display:flex;flex-direction:column;gap:8px}
+
+  .timeline{display:flex;flex-direction:column;gap:0}
+  .tl{display:grid;grid-template-columns:22px 1fr;gap:11px;padding:9px 0;align-items:start}
+  .tl .dot{width:10px;height:10px;border-radius:50%;background:var(--line);margin-top:5px}
+  .tl.done .dot{background:var(--ok)}
+  .tl.now .dot{background:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+  .tl .t{font-size:.87rem;font-weight:600}
+  .tl.pendingstep .t{color:var(--muted);font-weight:500}
+  .tl .s{font-size:.76rem;color:var(--muted);font-family:"DM Mono",monospace}
+
+  .note{background:var(--brand-soft);border-radius:9px;padding:13px 15px;font-size:.84rem;color:var(--ink)}
+  .empty{color:var(--muted);font-size:.87rem;padding:16px 0}
+  .stack{display:flex;flex-direction:column;gap:16px}
+  .hd{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:13px}
+  .hd h2{font-size:1rem}
+
+  footer{max-width:1000px;margin:0 auto;padding:0 16px 40px;color:var(--muted);font-size:.8rem;display:flex;flex-direction:column;gap:5px}
+  footer a{color:var(--muted)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="demobar">
+  <span class="dot" aria-hidden="true"></span>
+  <span><strong>Sandbox demo.</strong> No real money, no real game platforms, nothing is charged. Numbers and players below are made up.</span>
+</div>
+
+<div class="wrap">
+
+  <div class="topline">
+    <div class="brandmark">
+      <div class="mk" aria-hidden="true">GF</div>
+      <div>
+        <h1>GamingFlow</h1>
+        <div class="sub">Deposit &amp; auto-credit for gaming operators</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap">
+      <div class="switch" role="tablist" aria-label="View">
+        <button id="tabPlayer" role="tab" aria-selected="true">Player view</button>
+        <button id="tabOps" role="tab" aria-selected="false">Operator console</button>
+      </div>
+      <button class="ghost" id="btnReset">Reset demo</button>
+    </div>
+  </div>
+
+  <!-- ============ PLAYER ============ -->
+  <div id="viewPlayer">
+    <div class="grid2">
+      <div class="stack">
+
+        <div class="card pad" id="depositCard">
+          <div class="hd"><h2>Add credits</h2><span class="lbl">Player</span></div>
+          <div id="depForm">
+            <div class="field">
+              <label for="dPlatform">Game platform</label>
+              <select id="dPlatform"></select>
+            </div>
+            <div class="field">
+              <label for="dUser">Your username</label>
+              <input id="dUser" placeholder="e.g. riverkat" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="dAmount">Amount</label>
+              <div class="chips" id="amtChips"></div>
+            </div>
+            <div class="field">
+              <label>Pay with</label>
+              <div class="chips" id="methodChips"></div>
+            </div>
+            <button class="go" id="btnPay">Continue to payment</button>
+            <p class="empty" id="depHint" style="padding-top:10px"></p>
+          </div>
+          <div id="depPaused" hidden>
+            <div class="paused">
+              <h3>Deposits are paused right now</h3>
+              <p style="font-size:.88rem">We've turned off new deposits for a moment. Nothing is wrong with your account and your credits are safe. Check back shortly.</p>
+            </div>
+            <p class="empty">Flip the switch back on in the operator console to bring this form back.</p>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="hd"><h2>New here?</h2><span class="lbl">Sign up</span></div>
+          <div class="row">
+            <div class="field"><label for="nPlatform">Platform</label><select id="nPlatform"></select></div>
+            <div class="field"><label for="nUser">Pick a username</label><input id="nUser" placeholder="letters and numbers" autocomplete="off"></div>
+          </div>
+          <button class="go" id="btnCreate">Create my account</button>
+          <p class="empty" id="createOut"></p>
+        </div>
+
+      </div>
+
+      <div class="stack">
+        <div class="card pad">
+          <div class="hd"><h2>Your last deposit</h2><span class="lbl">Live</span></div>
+          <div id="playerTrack"><p class="empty">Make a deposit and watch it land.</p></div>
+        </div>
+        <div class="note">
+          On the real thing this page carries the operator's own name, colours and domain — and speaks English or Vietnamese at a tap.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ OPS ============ -->
+  <div id="viewOps" hidden>
+    <div class="stack">
+
+      <div class="card pad">
+        <div class="hd"><h2>Agent balances</h2><span class="lbl">Across your platforms</span></div>
+        <div class="tiles" id="balTiles"></div>
+      </div>
+
+      <div class="card pad">
+        <div class="hd"><h2>Deposits</h2><span class="lbl" id="depCount"></span></div>
+        <div class="tw">
+          <table>
+            <thead><tr><th>Reference</th><th>Player</th><th>Platform</th><th>Amount</th><th>Method</th><th>Status</th></tr></thead>
+            <tbody id="depRows"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="grid2">
+        <div class="card pad">
+          <div class="hd"><h2>Players</h2><span class="lbl" id="plCount"></span></div>
+          <div class="field"><input id="plSearch" placeholder="Search username…" autocomplete="off"></div>
+          <div class="tw">
+            <table>
+              <thead><tr><th>Username</th><th>Platform</th><th>Game ID</th><th>Credited</th></tr></thead>
+              <tbody id="plRows"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card pad">
+          <div class="hd"><h2>Emergency stop</h2><span class="lbl">Deposits</span></div>
+          <p class="empty" style="padding-top:0" id="killState"></p>
+          <button class="go" id="btnKill"></button>
+          <p class="empty">Stops new deposits everywhere at once and puts a message where the form was. Existing credits are untouched.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<footer>
+  <p>GamingFlow is a working sandbox — a demonstration of the deposit and crediting system, not a live service. Platform names shown are invented; your own would appear here.</p>
+  <p>Built by <a href="https://turtlelogisticsllc.com">Turtle Logistics LLC</a></p>
+</footer>
+
+<div id="checkout"></div>
+
+<script>
+(function(){
+  "use strict";
+  var PLATFORMS=[
+    {id:"nova",  name:"Nova Reels",  bal:14820.50},
+    {id:"koi",   name:"Koi Gold",    bal:9375.00},
+    {id:"star",  name:"Star Vault",  bal:22140.75},
+    {id:"bay",   name:"Emerald Bay", bal:6480.25},
+    {id:"comet", name:"Comet Play",  bal:11905.00}
+  ];
+  var METHODS=[
+    {id:"cashapp",label:"Cash App"},{id:"paypal",label:"PayPal"},
+    {id:"venmo",label:"Venmo"},{id:"apple",label:"Apple Pay"},{id:"google",label:"Google Pay"}
+  ];
+  var AMOUNTS=[10,25,50,100,250];
+
+  var S,timers=[];
+  function seed(){
+    timers.forEach(clearTimeout); timers=[];
+    S={
+      on:true,
+      sel:{amount:25,method:"cashapp"},
+      players:[
+        {u:"riverkat",p:"nova", gid:"15901684", credited:120},
+        {u:"dozer_88", p:"star", gid:"22104773", credited:340},
+        {u:"mai_lynn", p:"koi",  gid:"90448120", credited:75},
+        {u:"tealeaf",  p:"comet",gid:"31776402", credited:500}
+      ],
+      deposits:[
+        {ref:"dep_7a41c9", u:"tealeaf", p:"comet", amt:100, m:"paypal",  st:"credited", t:"today 18:42"},
+        {ref:"dep_3e08bb", u:"riverkat",p:"nova",  amt:25,  m:"cashapp", st:"credited", t:"today 18:15"},
+        {ref:"dep_9c72fd", u:"dozer_88",p:"star",  amt:50,  m:"venmo",   st:"credited", t:"today 17:03"}
+      ],
+      last:null
+    };
+  }
+
+  var $=function(id){return document.getElementById(id)};
+  var money=function(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})};
+  var pname=function(id){var p=PLATFORMS.filter(function(x){return x.id===id})[0];return p?p.name:id};
+  var mname=function(id){var m=METHODS.filter(function(x){return x.id===id})[0];return m?m.label:id};
+
+  function fillSelect(el){
+    el.innerHTML=PLATFORMS.map(function(p){return '<option value="'+p.id+'">'+p.name+'</option>'}).join("");
+  }
+
+  function drawChips(){
+    $("amtChips").innerHTML=AMOUNTS.map(function(a){
+      return '<button class="chip" data-amt="'+a+'" aria-pressed="'+(S.sel.amount===a)+'">$'+a+'</button>';
+    }).join("");
+    $("methodChips").innerHTML=METHODS.map(function(m){
+      return '<button class="chip" data-m="'+m.id+'" aria-pressed="'+(S.sel.method===m.id)+'">'+m.label+'</button>';
+    }).join("");
+  }
+
+  function statusPill(st){
+    if(st==="credited") return '<span class="pill p-cred">credited</span>';
+    if(st==="paid")     return '<span class="pill p-paid">crediting…</span>';
+    return '<span class="pill p-pend">waiting on payment</span>';
+  }
+
+  function drawOps(){
+    $("balTiles").innerHTML=PLATFORMS.map(function(p){
+      return '<div class="tile"><span class="nm">'+p.name+'</span><span class="bal">'+money(p.bal)+'</span><span class="cap">agent balance</span></div>';
+    }).join("");
+
+    $("depCount").textContent=S.deposits.length+" total";
+    $("depRows").innerHTML=S.deposits.map(function(d){
+      return '<tr><td class="mono">'+d.ref+'</td><td>'+d.u+'</td><td>'+pname(d.p)+'</td><td class="mono">'+money(d.amt)+'</td><td>'+mname(d.m)+'</td><td>'+statusPill(d.st)+'</td></tr>';
+    }).join("");
+
+    var q=($("plSearch").value||"").toLowerCase();
+    var list=S.players.filter(function(p){return p.u.toLowerCase().indexOf(q)>-1});
+    $("plCount").textContent=S.players.length+" on file";
+    $("plRows").innerHTML=list.length?list.map(function(p){
+      return '<tr><td>'+p.u+'</td><td>'+pname(p.p)+'</td><td class="mono">'+p.gid+'</td><td class="mono">'+money(p.credited)+'</td></tr>';
+    }).join(""):'<tr><td colspan="4" class="empty">Nobody matches that.</td></tr>';
+
+    $("killState").textContent=S.on?"Deposits are open. Players can pay in right now.":"Deposits are stopped. The payment form is hidden.";
+    var b=$("btnKill");
+    b.textContent=S.on?"Stop deposits":"Open deposits";
+    b.className="go"+(S.on?" danger":"");
+  }
+
+  function drawPlayer(){
+    $("depForm").hidden=!S.on;
+    $("depPaused").hidden=S.on;
+
+    var d=S.last;
+    if(!d){ $("playerTrack").innerHTML='<p class="empty">Make a deposit and watch it land.</p>'; return }
+    var steps=[
+      {k:"sent",  t:"Payment sent",              s:mname(d.m)},
+      {k:"paid",  t:"Payment confirmed",         s:"your provider told us it cleared"},
+      {k:"cred",  t:"Credits on the game account",s:money(d.amt)+" → "+d.u+" on "+pname(d.p)}
+    ];
+    var reached=d.st==="credited"?3:(d.st==="paid"?2:1);
+    $("playerTrack").innerHTML=
+      '<div class="timeline">'+steps.map(function(st,i){
+        var cls=i<reached-1?"done":(i===reached-1?(d.st==="credited"&&i===2?"done":"now"):"pendingstep");
+        return '<div class="tl '+cls+'"><span class="dot"></span><div><div class="t">'+st.t+'</div><div class="s">'+st.s+'</div></div></div>';
+      }).join("")+'</div>'+
+      (d.st==="credited"
+        ? '<div class="note" style="margin-top:12px">Done — and nobody typed anything into a back office.</div>'
+        : '<p class="empty">Usually about a minute in the real system. Sped up here.</p>');
+  }
+
+  function draw(){ drawPlayer(); drawOps(); }
+
+  function runPipeline(dep){
+    timers.push(setTimeout(function(){
+      dep.st="paid"; draw();
+      timers.push(setTimeout(function(){
+        dep.st="credited";
+        var pl=S.players.filter(function(p){return p.u===dep.u&&p.p===dep.p})[0];
+        if(pl) pl.credited+=dep.amt;
+        var plat=PLATFORMS.filter(function(p){return p.id===dep.p})[0];
+        if(plat) plat.bal-=dep.amt;
+        draw();
+      },2600));
+    },1500));
+  }
+
+  function closeCheckout(){ $("checkout").innerHTML=""; }
+
+  function openCheckout(){
+    var amt=S.sel.amount, m=S.sel.method, u=($("dUser").value||"").trim(), p=$("dPlatform").value;
+    $("checkout").innerHTML=
+      '<div class="veil" role="dialog" aria-modal="true" aria-label="Simulated checkout"><div class="modal">'+
+        '<div class="fake">Simulated checkout — no payment is taken</div>'+
+        '<div class="amt">'+money(amt)+'</div>'+
+        '<div class="to">to '+u+' on '+pname(p)+'<br>via '+mname(m)+'</div>'+
+        '<div class="acts">'+
+          '<button class="go" id="ckOk">Pretend the payment succeeded</button>'+
+          '<button class="go neutral" id="ckNo">Pretend it was cancelled</button>'+
+        '</div>'+
+        '<p class="empty" style="text-align:center;padding:0">In the real system this is where '+mname(m)+' opens.</p>'+
+      '</div></div>';
+
+    $("ckOk").onclick=function(){
+      closeCheckout();
+      var ref="dep_"+Math.random().toString(16).slice(2,8);
+      var dep={ref:ref,u:u,p:p,amt:amt,m:m,st:"pending",t:"just now"};
+      S.deposits.unshift(dep); S.last=dep;
+      if(!S.players.some(function(x){return x.u===u&&x.p===p})){
+        S.players.unshift({u:u,p:p,gid:String(Math.floor(10000000+Math.random()*89999999)),credited:0});
+      }
+      draw(); runPipeline(dep);
+    };
+    $("ckNo").onclick=function(){
+      closeCheckout();
+      $("depHint").textContent="Cancelled — nothing was charged and no credits were added.";
+    };
+  }
+
+  function validate(){
+    var u=($("dUser").value||"").trim();
+    var ok=/^[A-Za-z0-9_]{1,13}$/.test(u);
+    $("btnPay").disabled=!ok;
+    $("depHint").textContent = u.length===0 ? "" : (ok?"":"Usernames are letters, numbers and underscore, up to 13 characters.");
+  }
+
+  function wire(){
+    fillSelect($("dPlatform")); fillSelect($("nPlatform")); drawChips();
+
+    $("amtChips").onclick=function(e){
+      var b=e.target.closest("[data-amt]"); if(!b)return;
+      S.sel.amount=+b.dataset.amt; drawChips();
+    };
+    $("methodChips").onclick=function(e){
+      var b=e.target.closest("[data-m]"); if(!b)return;
+      S.sel.method=b.dataset.m; drawChips();
+    };
+    $("dUser").oninput=validate;
+    $("btnPay").onclick=openCheckout;
+
+    $("btnCreate").onclick=function(){
+      var u=($("nUser").value||"").trim(), p=$("nPlatform").value;
+      if(!/^[A-Za-z0-9_]{1,13}$/.test(u)){ $("createOut").textContent="Pick a username of letters, numbers or underscore, up to 13 characters."; return }
+      if(S.players.some(function(x){return x.u===u&&x.p===p})){ $("createOut").textContent='"'+u+'" is already taken on '+pname(p)+'.'; return }
+      var gid=String(Math.floor(10000000+Math.random()*89999999));
+      S.players.unshift({u:u,p:p,gid:gid,credited:0});
+      $("createOut").textContent="Account created on "+pname(p)+" — game ID "+gid+". You can deposit to it now.";
+      $("dUser").value=u; $("dPlatform").value=p; validate(); draw();
+    };
+
+    $("plSearch").oninput=drawOps;
+    $("btnKill").onclick=function(){ S.on=!S.on; draw(); };
+
+    $("tabPlayer").onclick=function(){ show("player") };
+    $("tabOps").onclick=function(){ show("ops") };
+    $("btnReset").onclick=function(){
+      PLATFORMS[0].bal=14820.50;PLATFORMS[1].bal=9375.00;PLATFORMS[2].bal=22140.75;
+      PLATFORMS[3].bal=6480.25;PLATFORMS[4].bal=11905.00;
+      seed(); $("dUser").value=""; $("nUser").value=""; $("createOut").textContent="";
+      $("depHint").textContent=""; $("plSearch").value=""; drawChips(); validate(); draw();
+    };
+  }
+
+  function show(which){
+    var p=which==="player";
+    $("viewPlayer").hidden=!p; $("viewOps").hidden=p;
+    $("tabPlayer").setAttribute("aria-selected",String(p));
+    $("tabOps").setAttribute("aria-selected",String(!p));
+  }
+
+  seed(); wire(); validate(); draw();
+})();
+</script>
+
+</body>
+</html>
